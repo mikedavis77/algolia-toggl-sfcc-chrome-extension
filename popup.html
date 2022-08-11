@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="header">
+      <div class="company-name">Algolia SFDC Toggl</div>
+      <span id="settings"><button id="editSettingsBtn">settings</button></span>
+    </div>
+    <div id="settingsMsg" class="hideme">
+      <p>There are no settings set for this extension, please enter your workspace Id and API key in the settings.</p>
+    </div>
+    <div id="projectContent" class="hideme">
+      <div id="user">Hi, <span id="userName"></span></div>
+      <div id="viewClient">
+        <label>Client</label>
+        <div>
+          <strong>Name:</strong><input type="text" id="clientName" value="Mike Davis Test" />
+          <button id="checkClientNameBtn">Check</button>
+          <span id="clientValid" class="hideme"><span></span>Client valid - &#10003;</span>
+          <span id="clientInvalid" class="hideme"><span></span>Client invalid - &#10007;</span>
+          <div><button id="addClientBtn" class="hideme">Create client</button></div>
+        </div>
+      </div>
+
+      <div id="viewProject" class="hideme">
+        <hr />
+        <label>Project</label>
+        <div><strong>Case ID:</strong><input type="text" id="caseId" value="00026239" /></div>
+        <div>
+          <strong>Case Title:</strong>
+          <input type="text" id="caseTitle" value="Amplience wants to exceed 1000 Indices" />
+        </div>
+        <div>
+          <strong>Case Type:</strong>
+          <select id="caseType">
+            <option value="">Please select</option>
+            <option value="Short Term Case|181565570">Short Term Case</option>
+          </select>
+        </div>
+        <div>
+          <button id="addToTogglBtn" disabled>Add project to Toggl</button>
+        </div>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

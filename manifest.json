@@ -1,0 +1,25 @@
+{
+  "name": "Algolia SFDC Toggl Integration",
+  "description": "Quick and easy way to create Toggl projects from the SFDC cases",
+  "version": "0.1",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "activeTab", "tabs", "scripting", "webNavigation"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_idle",
+      "matches": ["https://algolia.lightning.force.com/lightning/*"],
+      "js": ["script.js"]
+    }
+  ],
+  "host_permissions": ["https://api.track.toggl.com/*"]
+}

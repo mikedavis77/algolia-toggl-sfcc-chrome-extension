@@ -5,10 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 const addListenerForAlgoliaSfdcToggl = () => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (/algolia.lightning.force.com\/lightning\/r\/Case\/[^/]*/i.test(tabs[0].url)) {
-      if (!chrome.tabs) {
-        console.log('no tabs!');
-        return;
-      }
+      chrome.storage.local.set({ tabCache: {} }, () => {});
       // todo set icon image
       //chrome.action.setIcon({ path: 'icons/16x16.png' });
       chrome.action.setPopup({ popup: 'popup.html' });

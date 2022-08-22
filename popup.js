@@ -22,6 +22,21 @@ chrome.storage.local.get(['tooglWorkspaceId', 'togglAppiKey'], ({ tooglWorkspace
   }
 });
 
+chrome.storage.local.get('tabCache', ({ tabCache }) => {
+  if (tabCache.clientName) {
+    document.querySelector('#clientName').value = tabCache.clientName;
+  }
+  if (tabCache.caseId) {
+    document.querySelector('#caseId').value = tabCache.caseId;
+  }
+  if (tabCache.caseTitle) {
+    document.querySelector('#caseTitle').value = tabCache.caseTitle;
+  }
+  if (tabCache.validClient) {
+    document.querySelector('#viewProject').classList.remove('hideme');
+  }
+});
+
 // Validate user/ get details.
 const getUser = async () => {
   return await fetch('https://api.track.toggl.com/api/v9/me', {
@@ -90,6 +105,20 @@ const createProject = async (projectName, templateId, clientId) => {
     .catch((err) => console.error(err));
 };
 
+const setTabCache = (key, value) => {
+  chrome.storage.local.get('tabCache', ({ tabCache }) => {
+    const newTabCache = {
+      ...tabCache,
+    };
+    newTabCache[key] = value;
+    chrome.storage.local.set({ tabCache: newTabCache }, () => {});
+  });
+};
+
+const resetTabeCache = () => {
+  chrome.storage.local.set({ tabCache: {} }, () => {});
+};
+
 document.querySelector('#editSettingsBtn').addEventListener('click', () => {
   if (chrome.runtime.openOptionsPage) {
     chrome.runtime.openOptionsPage();
@@ -98,10 +127,24 @@ document.querySelector('#editSettingsBtn').addEventListener('click', () => {
   }
 });
 
+document.querySelectorAll('input[type="text"]').forEach((input) => {
+  input.addEventListener('keyup', (e) => {
+    setTabCache(e.target.id, e.target.value);
+
+    if (e.target.id === 'clientName' && e.target.value === '') {
+      document.querySelector('#viewProject').classList.add('hideme');
+      setTimeout(() => {
+        setTabCache('validClient', false);
+      }, 300);
+    }
+  });
+});
+
 document.querySelector('#checkClientNameBtn').addEventListener('click', async () => {
   document.querySelector('#viewProject').classList.add('hideme');
   document.querySelector('#clientInvalid').classList.add('hideme');
   document.querySelector('#clientValid').classList.add('hideme');
+  document.querySelector('#addClientBtn').classList.add('hideme');
 
   // Check if client name exists.
   const clientName = document.querySelector('#clientName');
@@ -113,6 +156,7 @@ document.querySelector('#checkClientNameBtn').addEventListener('click', async ()
     document.querySelector('#addClientBtn').classList.remove('hideme');
   } else {
     client = clientArray.pop();
+    setTabCache('validClient', true);
 
     document.querySelector('#clientValid').classList.remove('hideme');
     document.querySelector('#viewProject').classList.remove('hideme');
@@ -122,6 +166,7 @@ document.querySelector('#checkClientNameBtn').addEventListener('click', async ()
 document.querySelector('#addClientBtn').addEventListener('click', async () => {
   createClient(clientName.value).then((data) => {
     client = data;
+    setTabCache('validClient', true);
 
     document.querySelector('#clientInvalid').classList.add('hideme');
     document.querySelector('#addClientBtn').classList.add('hideme');
@@ -147,8 +192,17 @@ document.querySelector('#addToTogglBtn').addEventListener('click', async () => {
   const projectName = `${client.name} - ${caseTypeTitle} - ${caseTitle} | ${caseId}`;
   createProject(projectName, parseInt(templateIdShortTermCase), client.id).then((data) => {
     // todo display project link
-    alert('project created!');
     document.querySelector('#viewProject').classList.add('hideme');
+
+    const status = document.querySelector('#status');
+    status.textContent = 'Project created.';
+    /* setTimeout(function () {
+      status.textContent = '';
+    }, 3000); */
+
+    resetTabeCache();
+
+    document.querySelector('#clientName').value = '';
     document.querySelector('#caseId').value = '';
     document.querySelector('#caseType').selectedIndex = 0;
     document.querySelector('#caseTitle').value = '';

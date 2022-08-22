@@ -1,6 +1,6 @@
 body {
-  width: 350px;
-  height: 280px;
+  width: 360px;
+  height: 290px;
   padding: 5px;
 }
 
@@ -27,8 +27,13 @@ button.current {
   box-shadow: 0 0 0 2px white, 0 0 0 4px black;
 }
 
-button#addToToggl {
+button#addToTogglBtn {
   margin: 25px 0 0 0;
+}
+
+button#editSettingsBtn {
+  font-size: 25px;
+  padding: 0 10px;
 }
 
 .header {
@@ -41,24 +46,38 @@ button#addToToggl {
 } */
 
 .company-name {
-  font-size: 24px;
+  font-size: 18px;
   display: flex;
-  margin-left: 6px;
   align-items: center;
+}
+
+label {
+  font-size: 13px;
+  font-weight: bold;
+  border-bottom: 1px dashed;
+}
+
+#status {
+  color: green;
 }
 
 #clientValid {
   color: green;
 }
 
-#clientValid span {
-  content: '\2713';
-}
-
 #clientInvalid {
   color: red;
 }
 
-#clientInvalid span {
-  content: '\2717';
+#viewClient,
+#viewProject {
+  padding-top: 10px;
+}
+
+#viewProject {
+  border-top: 1px solid black;
+}
+
+#viewProject div:first-of-type {
+  padding-top: 10px;
 }

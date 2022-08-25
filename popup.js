@@ -37,74 +37,68 @@ chrome.storage.local.get('tabCache', ({ tabCache }) => {
   }
 });
 
-// Validate user/ get details.
-const getUser = async () => {
-  return await fetch('https://api.track.toggl.com/api/v9/me', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${btoa(`${apiKey}:api_token`)}`,
-    },
-  })
-    .then((resp) => resp.json())
-    .then((json) => json)
-    .catch((err) => console.error(err));
+// Toggl API wrappers.
+const toggleApiGetHeaders = () => {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Basic ${btoa(`${apiKey}:api_token`)}`,
+  };
 };
 
-// Get Clients.
-const getClients = async () => {
-  return await fetch(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/clients`, {
+const togglApiClientGet = async (url) => {
+  return await fetch(url, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${btoa(`${apiKey}:api_token`)}`,
-    },
+    headers: toggleApiGetHeaders(),
   })
     .then((resp) => resp.json())
     .then((json) => json)
-    .catch((err) => console.error(err));
+    .catch((err) => console.error(url, err));
+};
+
+const togglApiClientPost = async (url, data = {}) => {
+  return await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: toggleApiGetHeaders(),
+  })
+    .then((resp) => resp.json())
+    .then((json) => json)
+    .catch((err) => console.error(url, err));
+};
+
+// Get user details.
+const getUser = async () => {
+  return togglApiClientGet('https://api.track.toggl.com/api/v9/me');
+};
+
+// Get clients.
+const getClients = async () => {
+  return togglApiClientGet(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/clients`);
 };
 
 // Create client.
 const createClient = async (clientName) => {
-  return await fetch(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/clients`, {
-    method: 'POST',
-    body: JSON.stringify({
-      name: clientName,
-      wid: workspaceId,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${btoa(`${apiKey}:api_token`)}`,
-    },
-  })
-    .then((resp) => resp.json())
-    .then((json) => json)
-    .catch((err) => console.error(err));
+  const data = {
+    name: clientName,
+    wid: parseInt(workspaceId),
+  };
+  return togglApiClientPost(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/clients`, data);
 };
 
 // Create project.
 const createProject = async (projectName, templateId, clientId) => {
-  return await fetch(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/projects`, {
-    method: 'POST',
-    body: JSON.stringify({
-      active: true,
-      //is_private: true,
-      name: `[Mikes New Test Project]:: ${projectName}`,
-      template: true,
-      template_id: templateId,
-      client_id: clientId,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${btoa(`${apiKey}:api_token`)}`,
-    },
-  })
-    .then((resp) => resp.json())
-    .then((json) => json)
-    .catch((err) => console.error(err));
+  const data = {
+    active: true,
+    //is_private: true,
+    name: `[Mikes New Test Project]:: ${projectName}`,
+    template: true,
+    template_id: templateId,
+    client_id: clientId,
+  };
+  return togglApiClientPost(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/projects`, data);
 };
 
+// Set tab cache.
 const setTabCache = (key, value) => {
   chrome.storage.local.get('tabCache', ({ tabCache }) => {
     const newTabCache = {
@@ -118,6 +112,8 @@ const setTabCache = (key, value) => {
 const resetTabeCache = () => {
   chrome.storage.local.set({ tabCache: {} }, () => {});
 };
+
+/*** Event listeners ***/
 
 document.querySelector('#editSettingsBtn').addEventListener('click', () => {
   if (chrome.runtime.openOptionsPage) {

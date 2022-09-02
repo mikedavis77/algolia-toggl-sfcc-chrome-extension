@@ -70,14 +70,14 @@ label {
 }
 
 #viewClient,
-#viewProject {
+#viewCase {
   padding-top: 10px;
 }
 
-#viewProject {
+#viewCase {
   border-top: 1px solid black;
 }
 
-#viewProject div:first-of-type {
+#viewCase div:first-of-type {
   padding-top: 10px;
 }

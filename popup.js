@@ -23,6 +23,9 @@ chrome.storage.local.get(['tooglWorkspaceId', 'togglAppiKey'], ({ tooglWorkspace
 });
 
 chrome.storage.local.get('tabCache', ({ tabCache }) => {
+  if (tabCache.client) {
+    client = tabCache.client;
+  }
   if (tabCache.clientName) {
     document.querySelector('#clientName').value = tabCache.clientName;
   }
@@ -32,9 +35,9 @@ chrome.storage.local.get('tabCache', ({ tabCache }) => {
   if (tabCache.caseTitle) {
     document.querySelector('#caseTitle').value = tabCache.caseTitle;
   }
-  if (tabCache.validClient) {
-    document.querySelector('#viewProject').classList.remove('hideme');
-  }
+  /* if (tabCache.validClient) {
+    document.querySelector('#viewCase').classList.remove('hideme');
+  } */
 });
 
 // Toggl API wrappers.
@@ -90,10 +93,11 @@ const createProject = async (projectName, templateId, clientId) => {
   const data = {
     active: true,
     //is_private: true,
-    name: `[Mikes New Test Project]:: ${projectName}`,
+    //name: `[Mikes New Test Project]:: ${projectName}`,
+    name: projectName,
     template: true,
-    template_id: templateId,
-    client_id: clientId,
+    template_id: parseInt(templateId),
+    client_id: parseInt(clientId),
   };
   return togglApiClientPost(`https://api.track.toggl.com/api/v9/workspaces/${workspaceId}/projects`, data);
 };
@@ -113,6 +117,14 @@ const resetTabeCache = () => {
   chrome.storage.local.set({ tabCache: {} }, () => {});
 };
 
+const setClient = (data) => {
+  client = data;
+  setTabCache('client', client);
+  setTimeout(() => {
+    setTabCache('validClient', true);
+  }, 300);
+};
+
 /*** Event listeners ***/
 
 document.querySelector('#editSettingsBtn').addEventListener('click', () => {
@@ -128,7 +140,7 @@ document.querySelectorAll('input[type="text"]').forEach((input) => {
     setTabCache(e.target.id, e.target.value);
 
     if (e.target.id === 'clientName' && e.target.value === '') {
-      document.querySelector('#viewProject').classList.add('hideme');
+      //document.querySelector('#viewCase').classList.add('hideme');
       setTimeout(() => {
         setTabCache('validClient', false);
       }, 300);
@@ -137,37 +149,35 @@ document.querySelectorAll('input[type="text"]').forEach((input) => {
 });
 
 document.querySelector('#checkClientNameBtn').addEventListener('click', async () => {
-  document.querySelector('#viewProject').classList.add('hideme');
+  //document.querySelector('#viewCase').classList.add('hideme');
   document.querySelector('#clientInvalid').classList.add('hideme');
   document.querySelector('#clientValid').classList.add('hideme');
   document.querySelector('#addClientBtn').classList.add('hideme');
 
   // Check if client name exists.
-  const clientName = document.querySelector('#clientName');
-  const clientArray = clientList.filter((obj) => obj.name === clientName.value);
+  const clientNameEl = document.querySelector('#clientName');
+  const clientArray = clientList.filter((obj) => obj.name === clientNameEl.value);
 
   if (clientArray.length < 1) {
     // Show create client button.
     document.querySelector('#clientInvalid').classList.remove('hideme');
     document.querySelector('#addClientBtn').classList.remove('hideme');
   } else {
-    client = clientArray.pop();
-    setTabCache('validClient', true);
+    setClient(clientArray.pop());
 
     document.querySelector('#clientValid').classList.remove('hideme');
-    document.querySelector('#viewProject').classList.remove('hideme');
+    //document.querySelector('#viewCase').classList.remove('hideme');
   }
 });
 
 document.querySelector('#addClientBtn').addEventListener('click', async () => {
   createClient(clientName.value).then((data) => {
-    client = data;
-    setTabCache('validClient', true);
+    setClient(data);
 
     document.querySelector('#clientInvalid').classList.add('hideme');
     document.querySelector('#addClientBtn').classList.add('hideme');
     document.querySelector('#clientValid').classList.remove('hideme');
-    document.querySelector('#viewProject').classList.remove('hideme');
+    //document.querySelector('#viewCase').classList.remove('hideme');
   });
 });
 
@@ -177,18 +187,22 @@ document.querySelector('#caseType').addEventListener('change', (e) => {
 
 document.querySelector('#addToTogglBtn').addEventListener('click', async () => {
   const caseId = document.querySelector('#caseId').value;
-  const [caseTypeTitle, templateIdShortTermCase] = document.querySelector('#caseType').value.split('|');
   const caseTitle = document.querySelector('#caseTitle').value;
+  const templateId = document.querySelector('#caseType').value;
 
-  if (typeof templateIdShortTermCase === 'undefined') {
+  const caseTypeEl = document.querySelector('#caseType');
+  const caseTypeTitle = caseTypeEl.options[caseTypeEl.selectedIndex].text;
+
+  if (typeof templateId === 'undefined') {
     return;
   }
 
   // Add project
-  const projectName = `${client.name} - ${caseTypeTitle} - ${caseTitle} | ${caseId}`;
-  createProject(projectName, parseInt(templateIdShortTermCase), client.id).then((data) => {
+  const caseTitleText = caseTypeTitle.toLowerCase() === 'short term case' ? ` - ${caseTitle}` : '';
+  const projectName = `${client.name} - ${caseTypeTitle}${caseTitleText} |${caseId}`;
+  createProject(projectName, templateId, client.id).then((data) => {
     // todo display project link
-    document.querySelector('#viewProject').classList.add('hideme');
+    //document.querySelector('#viewCase').classList.add('hideme');
 
     const status = document.querySelector('#status');
     status.textContent = 'Project created.';

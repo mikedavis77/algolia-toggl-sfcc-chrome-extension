@@ -25,9 +25,9 @@
         </div>
       </div>
 
-      <div id="viewProject" class="hideme">
-        <label>Project</label>
-        <div><strong>Case ID:</strong><input type="text" id="caseId" value="" /></div>
+      <div id="viewCase">
+        <label>Case</label>
+        <div><strong>Case/ Service ID:</strong><input type="text" id="caseId" value="" /></div>
         <div>
           <strong>Case Title:</strong>
           <input type="text" id="caseTitle" value="" />
@@ -36,7 +36,25 @@
           <strong>Case Type:</strong>
           <select id="caseType">
             <option value="">Please select</option>
-            <option value="Short Term Case|181565570">Short Term Case</option>
+            <optgroup label="General Cases">
+              <option value="181565570">Short Term Case</option>
+              <option value="181565514">Pre-sales</option>
+            </optgroup>
+            <optgroup label="Customer Services">
+              <option value="181563976">Enterprise Foundation</option>
+              <option value="181584314">Integration Services</option>
+              <option value="181853474">Magento Integration</option>
+              <option value="181564672">Platform Foundation</option>
+            </optgroup>
+            <optgroup label="Professional Services">
+              <option value="181563830">Advisory 25</option>
+              <option value="181562831">Blueprint</option>
+              <option value="181565466">Kickstart</option>
+              <option value="181563383">Pulse</option>
+              <option value="181563497">Quick Start for Crawler</option>
+              <option value="181563676">Quick Start for Sending Events</option>
+              <option value="183090863">Quick Start for Shopify</option>
+            </optgroup>
           </select>
         </div>
         <div>

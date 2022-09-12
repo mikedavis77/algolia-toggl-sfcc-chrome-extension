@@ -35,9 +35,6 @@ chrome.storage.local.get('tabCache', ({ tabCache }) => {
   if (tabCache.caseTitle) {
     document.querySelector('#caseTitle').value = tabCache.caseTitle;
   }
-  /* if (tabCache.validClient) {
-    document.querySelector('#viewCase').classList.remove('hideme');
-  } */
 });
 
 // Toggl API wrappers.
@@ -92,8 +89,6 @@ const createClient = async (clientName) => {
 const createProject = async (projectName, templateId, clientId) => {
   const data = {
     active: true,
-    //is_private: true,
-    //name: `[Mikes New Test Project]:: ${projectName}`,
     name: projectName,
     template: true,
     template_id: parseInt(templateId),
@@ -113,16 +108,37 @@ const setTabCache = (key, value) => {
   });
 };
 
-const resetTabeCache = () => {
+const resetTabCache = () => {
   chrome.storage.local.set({ tabCache: {} }, () => {});
 };
 
 const setClient = (data) => {
   client = data;
   setTabCache('client', client);
-  setTimeout(() => {
-    setTabCache('validClient', true);
-  }, 300);
+};
+
+const setUsername = (username) => {
+  document.querySelector('#userName').innerHTML = username;
+};
+
+// Validate that the project can be created
+const validateCanCreateProject = () => {
+  let isValid = true;
+  document.querySelectorAll('input[type="text"]').forEach((input) => {
+    if (input.value === '') {
+      isValid = false;
+    }
+  });
+
+  if (!client) {
+    isValid = false;
+  }
+
+  if (document.querySelector('#caseType').value === '') {
+    isValid = false;
+  }
+
+  document.querySelector('#addToTogglBtn').disabled = !isValid;
 };
 
 /*** Event listeners ***/
@@ -138,18 +154,11 @@ document.querySelector('#editSettingsBtn').addEventListener('click', () => {
 document.querySelectorAll('input[type="text"]').forEach((input) => {
   input.addEventListener('keyup', (e) => {
     setTabCache(e.target.id, e.target.value);
-
-    if (e.target.id === 'clientName' && e.target.value === '') {
-      //document.querySelector('#viewCase').classList.add('hideme');
-      setTimeout(() => {
-        setTabCache('validClient', false);
-      }, 300);
-    }
+    validateCanCreateProject();
   });
 });
 
 document.querySelector('#checkClientNameBtn').addEventListener('click', async () => {
-  //document.querySelector('#viewCase').classList.add('hideme');
   document.querySelector('#clientInvalid').classList.add('hideme');
   document.querySelector('#clientValid').classList.add('hideme');
   document.querySelector('#addClientBtn').classList.add('hideme');
@@ -166,7 +175,6 @@ document.querySelector('#checkClientNameBtn').addEventListener('click', async ()
     setClient(clientArray.pop());
 
     document.querySelector('#clientValid').classList.remove('hideme');
-    //document.querySelector('#viewCase').classList.remove('hideme');
   }
 });
 
@@ -177,12 +185,11 @@ document.querySelector('#addClientBtn').addEventListener('click', async () => {
     document.querySelector('#clientInvalid').classList.add('hideme');
     document.querySelector('#addClientBtn').classList.add('hideme');
     document.querySelector('#clientValid').classList.remove('hideme');
-    //document.querySelector('#viewCase').classList.remove('hideme');
   });
 });
 
 document.querySelector('#caseType').addEventListener('change', (e) => {
-  document.querySelector('#addToTogglBtn').disabled = e.target.value === '';
+  validateCanCreateProject();
 });
 
 document.querySelector('#addToTogglBtn').addEventListener('click', async () => {
@@ -201,17 +208,13 @@ document.querySelector('#addToTogglBtn').addEventListener('click', async () => {
   const caseTitleText = caseTypeTitle.toLowerCase() === 'short term case' ? ` - ${caseTitle}` : '';
   const projectName = `${client.name} - ${caseTypeTitle}${caseTitleText} |${caseId}`;
   createProject(projectName, templateId, client.id).then((data) => {
-    // todo display project link
-    //document.querySelector('#viewCase').classList.add('hideme');
-
+    // todo display project link?
     const status = document.querySelector('#status');
     status.textContent = 'Project created.';
-    /* setTimeout(function () {
-      status.textContent = '';
-    }, 3000); */
 
-    resetTabeCache();
+    resetTabCache();
 
+    client = null;
     document.querySelector('#clientName').value = '';
     document.querySelector('#caseId').value = '';
     document.querySelector('#caseType').selectedIndex = 0;
@@ -225,13 +228,13 @@ const start = async function () {
   chrome.storage.local.get(['togglUserCache', 'togglUserCacheTime'], ({ togglUserCache, togglUserCacheTime }) => {
     if (togglUserCache && togglUserCacheTime) {
       if (togglUserCacheTime > Date.now() - 60 * 60 * 24 * 1000) {
-        document.querySelector('#userName').innerHTML = togglUserCache.fullname;
+        setUsername(togglUserCache.fullname);
         return;
       }
     }
     getUser().then((me) => {
       chrome.storage.local.set({ togglUserCache: me, togglUserCacheTime: Date.now() }, () => {
-        document.querySelector('#userName').innerHTML = me.fullname;
+        setUsername(me.fullname);
       });
     });
   });

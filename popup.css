@@ -1,6 +1,6 @@
 body {
   width: 360px;
-  height: 290px;
+  height: 300px;
   padding: 5px;
 }
 
@@ -51,7 +51,8 @@ button#editSettingsBtn {
   align-items: center;
 }
 
-label {
+#viewClient > label,
+#viewCase > label {
   font-size: 13px;
   font-weight: bold;
   border-bottom: 1px dashed;
@@ -79,5 +80,12 @@ label {
 }
 
 #viewCase div:first-of-type {
-  padding-top: 10px;
+  padding-top: 8px;
+}
+
+.content label {
+  font-weight: bold;
+  display: inline-block;
+  width: 120px;
+  height: 20px;
 }

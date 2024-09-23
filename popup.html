@@ -16,8 +16,8 @@
       <div id="status"></div>
       <div id="viewClient">
         <label>Client</label>
-        <div>
-          <strong>Name:</strong><input type="text" id="clientName" value="" />
+        <div class="content">
+          <label>Name:</label><input type="text" id="clientName" value="" />
           <button id="checkClientNameBtn">Check</button>
           <span id="clientValid" class="hideme">&#10003; Client valid</span>
           <span id="clientInvalid" class="hideme">&#10007; Client invalid</span>
@@ -27,13 +27,13 @@
 
       <div id="viewCase">
         <label>Case</label>
-        <div><strong>Case/ Service ID:</strong><input type="text" id="caseId" value="" /></div>
-        <div>
-          <strong>Case Title:</strong>
+        <div class="content"><label>Case/ Service ID:</label><input type="text" id="caseId" value="" /></div>
+        <div class="content">
+          <label>Case Title:</label>
           <input type="text" id="caseTitle" value="" />
         </div>
-        <div>
-          <strong>Case Type:</strong>
+        <div class="content">
+          <label>Case Type:</label>
           <select id="caseType">
             <option value="">Please select</option>
             <optgroup label="General Cases">
